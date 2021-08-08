@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.mviarchitecture.R
 import com.example.mviarchitecture.ui.main.state.MainStateEvent
 import com.example.mviarchitecture.ui.main.state.MainStateEvent.*
+import com.example.mviarchitecture.util.DataState
 import java.lang.Exception
 
 class MainFragment: Fragment() {
@@ -68,14 +69,30 @@ class MainFragment: Fragment() {
 
             println("DEBUG: DataState: $dataState")
 
-            dataState.blogPosts?.let { blogPosts ->
-                // set blog posts
-                viewModel.setBlogListData(blogPosts)
+            // Handle Data<T>
+            dataState.data?.let { mainViewState ->
+
+                mainViewState.blogPosts?.let { blogPosts ->
+                    // set blog posts
+                    viewModel.setBlogListData(blogPosts)
+                }
+
+                mainViewState.user?.let { user ->
+                    // set user data
+                    viewModel.setUserData(user)
+                }
             }
 
-            dataState.user?.let { user ->
-                // set user data
-                viewModel.setUserData(user)
+
+
+            // Handle Error
+            dataState.message?.let {
+
+            }
+
+            // Handle Loading
+            dataState.loading.let {
+
             }
 
         })
