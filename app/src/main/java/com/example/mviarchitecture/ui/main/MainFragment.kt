@@ -8,6 +8,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.mviarchitecture.R
 import com.example.mviarchitecture.ui.main.state.MainStateEvent
+import com.example.mviarchitecture.ui.main.state.MainStateEvent.*
 import java.lang.Exception
 
 class MainFragment: Fragment() {
@@ -54,11 +55,11 @@ class MainFragment: Fragment() {
     }
 
     private fun triggerGetBlogsEvent() {
-        viewModel.setStateEvent(MainStateEvent.GetBlogPostsEvent())
+        viewModel.setStateEvent(GetBlogPostsEvent())
     }
 
     private fun triggerGetUserEvent() {
-        viewModel.setStateEvent(MainStateEvent.GetUserEvent("1"))
+        viewModel.setStateEvent(GetUserEvent("1"))
     }
 
     private fun subscribeObservers() {
