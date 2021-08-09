@@ -1,5 +1,6 @@
 package com.example.mviarchitecture.ui.main
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.*
@@ -7,16 +8,18 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.mviarchitecture.R
+import com.example.mviarchitecture.ui.DataStateListener
 import com.example.mviarchitecture.ui.main.state.MainStateEvent
 import com.example.mviarchitecture.ui.main.state.MainStateEvent.*
 import com.example.mviarchitecture.util.DataState
+import java.lang.ClassCastException
 import java.lang.Exception
 
 class MainFragment: Fragment() {
 
-    private val TAG = "MainFragment"
-
     lateinit var viewModel: MainViewModel
+
+    private lateinit var dataStateListener: DataStateListener
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -31,11 +34,21 @@ class MainFragment: Fragment() {
         super.onViewCreated(view, savedInstanceState)
         setHasOptionsMenu(true)
 
-        viewModel = activity?.let {
+        viewModel = activity?.run {
             ViewModelProvider(this).get(MainViewModel::class.java)
         }?: throw Exception("Invalid Activity")
 
         subscribeObservers()
+    }
+
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        try {
+            dataStateListener = context as DataStateListener
+        } catch (e: ClassCastException) {
+            println("DEBUG: $context must implement DataStateListener")
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -65,9 +78,13 @@ class MainFragment: Fragment() {
 
     private fun subscribeObservers() {
 
-        viewModel.dataState.observe(viewLifecycleOwner, Observer { dataState ->
+        viewModel.dataState.observe(viewLifecycleOwner, { dataState ->
 
             println("DEBUG: DataState: $dataState")
+
+            // handle message(error), Loading
+            dataStateListener.onDataStateChanged(dataState)
+
 
             // Handle Data<T>
             dataState.data?.let { mainViewState ->
@@ -81,18 +98,6 @@ class MainFragment: Fragment() {
                     // set user data
                     viewModel.setUserData(user)
                 }
-            }
-
-
-
-            // Handle Error
-            dataState.message?.let {
-
-            }
-
-            // Handle Loading
-            dataState.loading.let {
-
             }
 
         })

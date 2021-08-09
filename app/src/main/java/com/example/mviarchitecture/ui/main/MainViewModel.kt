@@ -16,8 +16,6 @@ import com.example.mviarchitecture.util.DataState
 
 class MainViewModel: ViewModel() {
 
-    private val TAG = "MainViewModel"
-
     private val _stateEvent: MutableLiveData<MainStateEvent> = MutableLiveData()
     private val _viewState: MutableLiveData<MainViewState> = MutableLiveData()
 
