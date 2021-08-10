@@ -8,20 +8,26 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.mviarchitecture.R
+import com.example.mviarchitecture.model.BlogPost
 import com.example.mviarchitecture.ui.DataStateListener
 import com.example.mviarchitecture.ui.main.state.MainStateEvent
 import com.example.mviarchitecture.ui.main.state.MainStateEvent.*
 import com.example.mviarchitecture.ui.main.state.MainViewState
 import com.example.mviarchitecture.util.DataState
+import com.example.mviarchitecture.util.TopSpacingItemDecoration
+import kotlinx.android.synthetic.main.fragment_main.*
 import java.lang.ClassCastException
 import java.lang.Exception
 
-class MainFragment: Fragment() {
+class MainFragment: Fragment(), BlogListAdapter.Interaction {
 
     lateinit var viewModel: MainViewModel
 
     private lateinit var dataStateListener: DataStateListener
+
+    private lateinit var blogListAdapter: BlogListAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -41,6 +47,19 @@ class MainFragment: Fragment() {
         }?: throw Exception("Invalid Activity")
 
         subscribeObservers()
+        initRecyclerView()
+    }
+
+    private fun initRecyclerView() {
+        recycler_view.apply {
+            layoutManager = LinearLayoutManager(activity)
+
+            val topSpacingItemDecoration = TopSpacingItemDecoration(30)
+            addItemDecoration(topSpacingItemDecoration)
+
+            blogListAdapter = BlogListAdapter(this@MainFragment)
+            adapter = blogListAdapter
+        }
     }
 
 
@@ -118,6 +137,7 @@ class MainFragment: Fragment() {
                 viewState?.blogPosts?.let {
                     // set BlogPosts to RecyclerView
                     println("DEBUG: Setting blog posts to RecyclerView: ${viewState.blogPosts}")
+                    blogListAdapter.submitList(it)
                 }
 
                 viewState?.user?.let{
@@ -129,5 +149,9 @@ class MainFragment: Fragment() {
         })
 
 
+    }
+
+    override fun onItemSelected(position: Int, item: BlogPost) {
+        println("DEBUG: Position: $position, Item: $item")
     }
 }
