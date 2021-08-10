@@ -5,12 +5,14 @@ import android.os.Bundle
 import android.util.Log
 import android.view.*
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.mviarchitecture.R
 import com.example.mviarchitecture.ui.DataStateListener
 import com.example.mviarchitecture.ui.main.state.MainStateEvent
 import com.example.mviarchitecture.ui.main.state.MainStateEvent.*
+import com.example.mviarchitecture.ui.main.state.MainViewState
 import com.example.mviarchitecture.util.DataState
 import java.lang.ClassCastException
 import java.lang.Exception
@@ -78,7 +80,8 @@ class MainFragment: Fragment() {
 
     private fun subscribeObservers() {
 
-        viewModel.dataState.observe(viewLifecycleOwner, { dataState ->
+
+        viewModel.dataState.observe(viewLifecycleOwner,  { dataState ->
 
             println("DEBUG: DataState: $dataState")
 
@@ -87,31 +90,44 @@ class MainFragment: Fragment() {
 
 
             // Handle Data<T>
-            dataState.data?.let { mainViewState ->
+            dataState.data?.let { event ->
 
-                mainViewState.blogPosts?.let { blogPosts ->
-                    // set blog posts
-                    viewModel.setBlogListData(blogPosts)
+                event.getContentIfNotHandled()?.let {  mainViewState ->
+
+                    mainViewState.blogPosts?.let {
+                        // set blog posts
+                        viewModel.setBlogListData(it)
+                    }
+
+                    mainViewState.user?.let {
+                        // set user data
+                        viewModel.setUserData(it)
+                    }
+                }
+            }
+
+        })
+
+        // java.lang.IllegalArgumentException: Cannot add the same observer with different lifecycles
+        // Getting above error using normal way (lambda exp)
+        // See link for more info - https://julien-bouffard.medium.com/beware-of-observer-lambdas-with-android-livedata-b27ae935b420
+
+        viewModel.viewState.observe(viewLifecycleOwner, object: Observer<MainViewState> {
+            override fun onChanged(viewState: MainViewState?) {
+
+                viewState?.blogPosts?.let {
+                    // set BlogPosts to RecyclerView
+                    println("DEBUG: Setting blog posts to RecyclerView: ${viewState.blogPosts}")
                 }
 
-                mainViewState.user?.let { user ->
-                    // set user data
-                    viewModel.setUserData(user)
+                viewState?.user?.let{
+                    // set User data to widgets
+                    println("DEBUG: Setting User data: ${viewState.user}")
                 }
             }
 
         })
 
 
-        viewModel.viewState.observe(viewLifecycleOwner, Observer { viewState ->
-
-            viewState.blogPosts?.let {
-                println("DEBUG: Setting blog posts to Recycler view: $it")
-            }
-
-            viewState.user?.let {
-                println("DEBUG: Setting user data: $it")
-            }
-        })
     }
 }
