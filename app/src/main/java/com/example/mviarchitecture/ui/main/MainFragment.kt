@@ -9,8 +9,10 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bumptech.glide.Glide
 import com.example.mviarchitecture.R
 import com.example.mviarchitecture.model.BlogPost
+import com.example.mviarchitecture.model.User
 import com.example.mviarchitecture.ui.DataStateListener
 import com.example.mviarchitecture.ui.main.state.MainStateEvent
 import com.example.mviarchitecture.ui.main.state.MainStateEvent.*
@@ -143,11 +145,25 @@ class MainFragment: Fragment(), BlogListAdapter.Interaction {
                 viewState?.user?.let{
                     // set User data to widgets
                     println("DEBUG: Setting User data: ${viewState.user}")
+                    setUserProperties(it)
                 }
             }
 
         })
 
+
+    }
+
+    private fun setUserProperties(user: User) {
+
+        username.text = user.username
+        email.text = user.email
+
+        view?.let {
+            Glide.with(it.context)
+                .load(user.image)
+                .into(image)
+        }
 
     }
 
